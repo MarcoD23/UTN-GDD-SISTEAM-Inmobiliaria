@@ -941,6 +941,94 @@ GO
 
 
 
+--VISTA 4:
+CREATE VIEW BI_SYSTEAM.VISTA_PORCENTAJE_INCUMPLIMIENTO_PAGO_ALQUILER AS
+	SELECT
+ 		T1.TIEMPO_ANIO																																												AS [Año Alquiler],
+		T1.TIEMPO_MES																																												AS [Mes Alquiler],
+		COUNT(*)																																													AS [Total pagos],
+		SUM(CASE WHEN  T1.TIEMPO_ANIO <= T2.TIEMPO_ANIO and T1.TIEMPO_CUATRIMESTRE <= T2.TIEMPO_CUATRIMESTRE AND T1.TIEMPO_MES<= T2.TIEMPO_MES  THEN 1 ELSE 0 END)									AS [Pagos en termino],
+		SUM(CASE WHEN T1.TIEMPO_ANIO > T2.TIEMPO_ANIO AND T1.TIEMPO_CUATRIMESTRE > T2.TIEMPO_CUATRIMESTRE AND T1.TIEMPO_MES > T2.TIEMPO_MES  THEN 1 ELSE 0 END)										AS [Pagos atrasados],
+		CAST(SUM(CASE WHEN T1.TIEMPO_ANIO  > T2.TIEMPO_ANIO AND T1.TIEMPO_CUATRIMESTRE > T2.TIEMPO_CUATRIMESTRE AND T1.TIEMPO_MES > T2.TIEMPO_MES THEN 1 ELSE 0 END) AS DECIMAL) / COUNT(*) * 100	AS [Porcentaje incumplimiento]
+	FROM BI_SYSTEAM.BI_FACT_ALQUILER A
+		JOIN BI_SYSTEAM.BI_TIEMPO T1 ON T1.ID_TIEMPO = A.ID_TIEMPO_FECHA_PERIODO_FIN
+		JOIN BI_SYSTEAM.BI_TIEMPO T2 ON T2.ID_TIEMPO = A.ID_TIEMPO_FECHA_PAGO
+	GROUP BY
+		T1.TIEMPO_ANIO,
+		T1.TIEMPO_MES
+GO
+
+
+
+
+
+--VISTA 5: 
+/*
+CREATE VIEW BI_SYSTEAM.VISTA_PORCENTAJE_PROMEDIO_INCREMENTO_VALOR_ALQUILERES AS
+  SELECT
+    YEAR(fecha_pago) AS anio
+    ,MONTH(fecha_pago) AS mes
+    ,ROUND(AVG(incremento),2) AS prom_incremento
+  FROM BI_SYSTEAM.BI_FACT_ALQUILER A
+  WHERE id_estado_alquiler=(SELECT id_estado_alquiler FROM TERCER_MALON.BI_estado_alquiler WHERE tipo='Activo')
+	AND incremento!=0
+  GROUP BY YEAR(fecha_pago), MONTH(fecha_pago)
+  ORDER BY YEAR(fecha_pago), MONTH(fecha_pago)
+GO */
+
+--VISTA 6:
+ 
+CREATE VIEW BI_SYSTEAM.VISTA_PRECIO_PROMEDIO_M2_VENTA AS
+	SELECT
+		TipoIn.TIPO_INMUEBLE_DESCRIPCION								AS [Tipo inmueble],
+		T1.TIEMPO_ANIO													AS [Año],
+		T1.TIEMPO_CUATRIMESTRE											AS [Cuatrimestre],
+		T1.TIEMPO_MES													AS [Mes],
+		Ubi.LOCALIDAD													AS [Localidad],
+		AVG(v.PRECIO_VENTA / (Rm2.METROS2_MAXIMO - Rm2.METROS2_MINIMO))	AS [Precio promedio M2]
+	FROM BI_SYSTEAM.BI_FACT_VENTA v
+		JOIN BI_SYSTEAM.BI_TIPO_INMUEBLE TipoIn ON v.id_tipo_inmueble = TipoIn.id_tipo_inmueble
+		JOIN BI_SYSTEAM.BI_UBICACION Ubi ON v.id_ubicacion = Ubi.id_Ubicacion
+		JOIN BI_SYSTEAM.BI_RANGO_M2 Rm2 ON v.id_rango_m2 = Rm2.id_rango_m2
+		JOIN BI_SYSTEAM.BI_TIEMPO T1 ON T1.id_tiempo = v.ID_TIEMPO_FECHA
+	GROUP BY
+		TipoIn.TIPO_INMUEBLE_DESCRIPCION,
+		T1.TIEMPO_ANIO,
+		T1.TIEMPO_CUATRIMESTRE,
+		T1.TIEMPO_MES,
+		Ubi.LOCALIDAD
+	GO
+
+/*
+ CREATE VIEW DropTable.vista6 as
+SELECT
+    T.nombre AS TipoInmueble,
+	TI.anio,
+	TI.cuatrimestre,
+	TI.mes,
+    U.localidad,
+    AVG(H.precio / (R.metros_maximos - R.metros_minimos)) AS PrecioPromedioM2
+FROM
+    [DropTable].[BI_Hecho_Venta] H
+JOIN
+    [DropTable].[BI_Tipo_inmueble] T ON H.id_tipo_inmueble = T.id_tipo_inmueble
+JOIN
+    [DropTable].[BI_Ubicacion] U ON H.id_ubicacion = U.id_Ubicacion
+JOIN
+    [DropTable].[BI_Rango_m2] R ON H.id_rango_m2 = R.id_rango_m2
+JOIN
+    [DropTable].[BI_Tiempo] TI ON TI.id_tiempo = H.id_tiempo_venta
+GROUP BY
+    T.nombre,
+    U.localidad,
+	TI.anio,
+	TI.cuatrimestre,
+	TI.mes;
+
+SELECT * FROM DropTable.vista6*/
+
+
+
 
 --COMANDO ELIMINAR FKS DE BI_SYSTEAM
 
