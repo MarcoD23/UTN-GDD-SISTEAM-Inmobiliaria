@@ -1052,7 +1052,7 @@ SELECT DISTINCT
 	v.VENTA_PRECIO_VENTA,
 	bitie.ID_TIEMPO,
 	sum(v.VENTA_COMISION) as SUMACOMISIONESVENTAS,
-	AVG(v.VENTA_PRECIO_VENTA / (birm2.METROS2_MAXIMO - birm2.METROS2_MINIMO))	AS [Precio promedio M2]
+	(v.VENTA_PRECIO_VENTA / I.INMUEBLE_SUPERFICIETOTAL)	AS [Precio por M2]
 	
 
 FROM SYSTEAM.VENTA v 
@@ -1089,7 +1089,10 @@ GROUP BY
 	bis.ID_SUCURSAL,
 	biu.ID_UBICACION, 
 	v.VENTA_PRECIO_VENTA,
-	bitie.ID_TIEMPO--,
+	bitie.ID_TIEMPO,
+	I.INMUEBLE_SUPERFICIETOTAL
+	
+	--,
 	--v.VENTA_COMISION
 
 END
@@ -1175,13 +1178,13 @@ GO
 --VISTA 2:
 CREATE VIEW BI_SYSTEAM.VISTA_PROMEDIO_ANUNCIOS_INMUEBLES AS
 	SELECT 
-		t1.TIEMPO_ANIO								AS [Año publicacion anuncio],
-		t1.TIEMPO_CUATRIMESTRE						AS [Cuatrimestre publicacion anuncio],
-		tipoOp.TIPO_OPERACION_DESCRIPCION			AS [Tipo Operacion],
-		tipoAmb.TIPO_INMUEBLE_DESCRIPCION			AS [Tipo Inmueble],
-		tipoMon.TIPO_MONEDA_DESCRIPCION				AS [Moneda Detalle],
+		t1.TIEMPO_ANIO											AS [Año publicacion],
+		t1.TIEMPO_CUATRIMESTRE									AS [Cuatrimestre publicacion],
+		tipoOp.TIPO_OPERACION_DESCRIPCION						AS [Tipo Operacion],
+		tipoAmb.TIPO_INMUEBLE_DESCRIPCION						AS [Tipo Inmueble],
+		tipoMon.TIPO_MONEDA_DESCRIPCION							AS [Moneda Detalle],
 		SUM(a.SUMA_PRECIOS_ANUNCIOS) / SUM(a.CANTIDAD_ANUNCIOS) AS [Precio promedio],
-		rM2.RANGO_M2_DESCRIPCION					AS [Rango M2] 
+		rM2.RANGO_M2_DESCRIPCION								AS [Rango M2] 
 	FROM
 		BI_SYSTEAM.BI_FACT_ANUNCIO a
 		JOIN BI_SYSTEAM.BI_TIPO_OPERACION tipoOp ON a.ID_TIPO_OPERACION = tipoOp.ID_TIPO_OPERACION
@@ -1203,11 +1206,11 @@ GO
 CREATE VIEW BI_SYSTEAM.VISTA_LOS_5_BARRIOS_MAS_ELEGIDOS_PARA_ALQUILAR AS
 
 SELECT
-    TIEMPO_ANIO,
-    TIEMPO_CUATRIMESTRE,
-    RANGO_ETARIO_DESCRIPCION,
-    BARRIO,
-    CantidadAlquileres
+    TIEMPO_ANIO                        	AS [Año publicacion anuncio],
+    TIEMPO_CUATRIMESTRE                 AS [Cuatrimestre publicacion anuncio],
+    RANGO_ETARIO_DESCRIPCION            AS [Rango Etario Inquilinos],
+    BARRIO                              AS [Barrio],
+    CantidadAlquileres                  AS [Cantidad Alquileres]
 FROM (
     SELECT
         T1.TIEMPO_ANIO,
@@ -1293,17 +1296,21 @@ CREATE VIEW BI_SYSTEAM.VISTA_PRECIO_PROMEDIO_M2_VENTA AS
 		T1.TIEMPO_ANIO													AS [Año],
 		T1.TIEMPO_CUATRIMESTRE											AS [Cuatrimestre],
 		Ubi.LOCALIDAD													AS [Localidad],
-		V.PRECIO_PROMEDIO_M2											AS [Precio promedio M2]
+		AVG(V.PRECIO_PROMEDIO_M2)										AS [Precio promedio M2]
+		
 	FROM BI_SYSTEAM.BI_FACT_VENTA v
 		JOIN BI_SYSTEAM.BI_TIPO_INMUEBLE TipoIn ON v.id_tipo_inmueble = TipoIn.id_tipo_inmueble
 		JOIN BI_SYSTEAM.BI_UBICACION Ubi ON v.id_ubicacion = Ubi.id_Ubicacion
 		JOIN BI_SYSTEAM.BI_TIEMPO T1 ON T1.id_tiempo = v.ID_TIEMPO_FECHA
+		JOIN BI_SYSTEAM.BI_TIPO_MONEDA TM ON TM.ID_TIPO_MONEDA = V.ID_TIPO_MONEDA
+		JOIN BI_SYSTEAM.BI_RANGO_M2 RM2 ON RM2.ID_RANGO_M2 = V.ID_RANGO_M2 
 	GROUP BY
 		TipoIn.TIPO_INMUEBLE_DESCRIPCION,
 		T1.TIEMPO_ANIO,
 		T1.TIEMPO_CUATRIMESTRE,
 		V.PRECIO_PROMEDIO_M2,
 		Ubi.LOCALIDAD
+		
 	GO
 
 --VISTA 7
