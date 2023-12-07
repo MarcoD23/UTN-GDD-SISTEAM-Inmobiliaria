@@ -1205,6 +1205,28 @@ GO
 --VISTA 3:
 CREATE VIEW BI_SYSTEAM.VISTA_LOS_5_BARRIOS_MAS_ELEGIDOS_PARA_ALQUILAR AS
 
+ SELECT TOP 5
+	 t1.TIEMPO_ANIO						AS [Año publicacion anuncio],
+	 t1.TIEMPO_CUATRIMESTRE				AS [Cuatrimestre publicacion anuncio],
+	 bar.BARRIO							AS [Barrio donde se publico el anuncio],
+	 re.RANGO_ETARIO_DESCRIPCION        AS [Rango Etario Inquilinos],
+	 al.ALQUILER_CANT_ALQUILER			AS [Cantidad alquileres dados de alta]
+  FROM
+    BI_SYSTEAM.BI_fact_alquiler AL
+    JOIN  BI_SYSTEAM.BI_tiempo T1 ON AL.ID_TIEMPO_FECHA_INICIO = T1.ID_TIEMPO
+	JOIN  BI_SYSTEAM.BI_UBICACION bar ON bar.ID_UBICACION = al.ID_UBICACION
+	JOIN  BI_SYSTEAM.BI_RANGO_ETARIO re ON re.ID_RANGO_ETARIO = al.ID_RANGO_ETARIO
+  GROUP BY 
+     t1.TIEMPO_ANIO,
+	 t1.TIEMPO_CUATRIMESTRE,
+	 bar.BARRIO,
+	 re.RANGO_ETARIO_DESCRIPCION,
+	 al.ALQUILER_CANT_ALQUILER	
+   ORDER BY 5 DESC
+
+GO
+/* PROHIBIDO USAR SUBSELECTS EN EL FROM!!!!
+
 SELECT
     TIEMPO_ANIO                        	AS [Año publicacion anuncio],
     TIEMPO_CUATRIMESTRE                 AS [Cuatrimestre publicacion anuncio],
@@ -1231,9 +1253,7 @@ FROM (
         u.BARRIO
 ) AS RankedBarrios
 WHERE
-    Ranking <= 5;
-GO
-
+    Ranking <= 5;*/
 
 
 --VISTA 4:
