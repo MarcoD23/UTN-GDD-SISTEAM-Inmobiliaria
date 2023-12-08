@@ -1210,7 +1210,7 @@ CREATE VIEW BI_SYSTEAM.VISTA_LOS_5_BARRIOS_MAS_ELEGIDOS_PARA_ALQUILAR AS
 	 t1.TIEMPO_CUATRIMESTRE				AS [Cuatrimestre publicacion anuncio],
 	 bar.BARRIO							AS [Barrio donde se publico el anuncio],
 	 re.RANGO_ETARIO_DESCRIPCION        AS [Rango Etario Inquilinos],
-	 COUNT(*)
+	 COUNT(*)							AS [Cantidad alquileres dados de alta]
 	 --al.ALQUILER_CANT_ALQUILER			AS [Cantidad alquileres dados de alta]
   FROM
     BI_SYSTEAM.BI_fact_alquiler AL
