@@ -1295,7 +1295,7 @@ SELECT
 		su.SUCURSAL_NOMBRE						AS [Sucursal],
 		T1.TIEMPO_ANIO							AS [Año],
 		T1.TIEMPO_CUATRIMESTRE					AS [Cuatrimestre],
-		ISNULL(AVG(al.ALQUILER_COMISION),0)		AS [Valor promedio comision]
+		ISNULL(SUM(al.ALQUILER_COMISION)/SUM(al.ALQUILER_CANT_ALQUILER),0)		AS [Valor promedio comision]
 
 	FROM BI_SYSTEAM.BI_FACT_ALQUILER al
 		JOIN BI_SYSTEAM.BI_TIPO_OPERACION tipoOp ON al.id_tipo_operacion = tipoOp.id_tipo_operacion
@@ -1314,7 +1314,7 @@ SELECT
 		su.SUCURSAL_NOMBRE						AS [Sucursal],
 		T1.TIEMPO_ANIO							AS [Año],
 		T1.TIEMPO_CUATRIMESTRE					AS [Cuatrimestre],
-		ISNULL(AVG(v.COMISION),0)				AS [Valor promedio comision]
+		ISNULL(sum(v.COMISION)/sum(v.CANT_VENTAS),0)				AS [Valor promedio comision]
 
 	FROM BI_SYSTEAM.BI_FACT_VENTA v
 		JOIN BI_SYSTEAM.BI_TIPO_OPERACION tipoOp ON v.id_tipo_operacion = tipoOp.id_tipo_operacion
